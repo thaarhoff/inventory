@@ -1,32 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Konfigurationsdatei Generator</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .container {
+      margin-top: 20px;
+    }
+    .info-icon {
+      margin-left: 5px;
+      color: #007bff;
+      cursor: pointer;
+    }
+    .tooltip-inner {
+      max-width: 200px;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="mt-5">Konfigurationsdatei Generator</h1>
-    <form id="configForm">
-      <div class="form-group">
-        <label for="configName">Konfigurationsname</label>
-        <input type="text" class="form-control" id="configName" required>
+    <h1>Konfigurationsdatei Generator</h1>
+    <p>Hier können Sie Ihre Konfigurationsdatei erstellen und herunterladen.</p>
+    <div class="row">
+      <div class="col-md-8">
+        <form id="configForm">
+          <div class="form-group">
+            <label for="configName">Konfigurationsname
+              <span class="info-icon" data-toggle="tooltip" title="Der Name der Konfiguration">?</span>
+            </label>
+            <input type="text" class="form-control" id="configName" required>
+          </div>
+          <div class="form-group">
+            <label for="configOption">Option
+              <span class="info-icon" data-toggle="tooltip" title="Wählen Sie eine Option aus">?</span>
+            </label>
+            <select class="form-control" id="configOption">
+              <option value="Option1">Option1</option>
+              <option value="Option2">Option2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="configCheckbox">Checkbox
+              <span class="info-icon" data-toggle="tooltip" title="Aktivieren Sie diese Option, wenn zutreffend">?</span>
+            </label>
+            <input type="checkbox" class="form-control" id="configCheckbox">
+          </div>
+          <div class="form-group">
+            <label for="configRadio">Radio Buttons
+              <span class="info-icon" data-toggle="tooltip" title="Wählen Sie eine der folgenden Optionen">?</span>
+            </label>
+            <div>
+              <input type="radio" name="configRadio" value="Option1"> Option1<br>
+              <input type="radio" name="configRadio" value="Option2"> Option2<br>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="configRange">Range
+              <span class="info-icon" data-toggle="tooltip" title="Wählen Sie einen Wert zwischen 1 und 100">?</span>
+            </label>
+            <input type="range" class="form-control" id="configRange" min="1" max="100">
+          </div>
+          <div class="form-group">
+            <label for="configDate">Datum
+              <span class="info-icon" data-toggle="tooltip" title="Wählen Sie ein Datum">?</span>
+            </label>
+            <input type="date" class="form-control" id="configDate">
+          </div>
+          <div class="form-group">
+            <label for="configColor">Farbe
+              <span class="info-icon" data-toggle="tooltip" title="Wählen Sie eine Farbe">?</span>
+            </label>
+            <input type="color" class="form-control" id="configColor">
+          </div>
+          <button type="submit" class="btn btn-primary">Generieren</button>
+        </form>
       </div>
-      <div class="form-group">
-        <label for="configOption">Option</label>
-        <select class="form-control" id="configOption">
-          <option value="Option1">Option1</option>
-          <option value="Option2">Option2</option>
-        </select>
+      <div class="col-md-4">
+        <div class="info-box">
+          <h2>Informationen zur Konfiguration</h2>
+          <p id="configSummary">Hier werden die aktuellen Konfigurationsdetails angezeigt.</p>
+        </div>
       </div>
-      <button type="submit" class="btn btn-primary">Generieren</button>
-    </form>
+    </div>
   </div>
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-  <script src="generator/main.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('[data-toggle="tooltip"]').tooltip();
+
+      $('#configForm').on('submit', function(event) {
+        event.preventDefault();
+
+        const configName = $('#configName').val();
+        const configOption = $('#configOption').val();
+        const configCheckbox = $('#configCheckbox').is(':checked');
+        const configRadio = $('input[name="configRadio"]:checked').val();
+        const configRange = $('#configRange').val();
+        const configDate = $('#configDate').val();
+        const configColor = $('#configColor').val();
+
+        const configData = {
+          name: configName,
+          option: configOption,
+          checkbox: configCheckbox,
+          radio: configRadio,
+          range: configRange,
+          date: configDate,
+          color: configColor
+        };
+
+        const yamlStr = jsyaml.dump(configData);
+        const blob = new Blob([yamlStr], { type: 'application/x-yaml' });
+        saveAs(blob, 'config.yaml');
+
+        $('#configSummary').text(JSON.stringify(configData, null, 2));
+      });
+    });
+  </script>
 </body>
 </html>
