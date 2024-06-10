@@ -1,1 +1,31 @@
-Hello World
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konfigurationsdatei Generator</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="mt-5">Konfigurationsdatei Generator</h1>
+    <form id="configForm">
+      <div class="form-group">
+        <label for="configName">Konfigurationsname</label>
+        <input type="text" class="form-control" id="configName" required>
+      </div>
+      <div class="form-group">
+        <label for="configOption">Option</label>
+        <select class="form-control" id="configOption">
+          <option value="Option1">Option1</option>
+          <option value="Option2">Option2</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Generieren</button>
+    </form>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
+  <script src="generator/main.js"></script>
+</body>
+</html>
