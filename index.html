@@ -18,23 +18,33 @@
       max-width: 200px;
       text-align: left;
     }
+    .required-field::after {
+      content: " *";
+      color: red;
+    }
+    .form-group.optional-field {
+      display: none;
+    }
+    .color-picker {
+      width: 20%;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Konfigurationsdatei Generator</h1>
-    <p>Hier können Sie Ihre Konfigurationsdatei erstellen und herunterladen.</p>
+    <p>Hier können Sie Ihre Konfigurationsdatei erstellen und herunterladen. <span class="required-field-info">* = Pflichtfeld</span></p>
     <div class="row">
       <div class="col-md-8">
         <form id="configForm">
           <div class="form-group">
-            <label for="configName">Konfigurationsname
+            <label for="configName" class="required-field">Konfigurationsname
               <span class="info-icon" data-toggle="tooltip" title="Der Name der Konfiguration">?</span>
             </label>
             <input type="text" class="form-control" id="configName" required>
           </div>
           <div class="form-group">
-            <label for="configOption">Option
+            <label for="configOption" class="required-field">Option
               <span class="info-icon" data-toggle="tooltip" title="Wählen Sie eine Option aus">?</span>
             </label>
             <select class="form-control" id="configOption">
@@ -42,11 +52,25 @@
               <option value="Option2">Option2</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="configCheckbox">Checkbox
-              <span class="info-icon" data-toggle="tooltip" title="Aktivieren Sie diese Option, wenn zutreffend">?</span>
+          <div class="form-group optional-field" id="additionalTextField">
+            <label for="additionalText">Zusätzlicher Text
+              <span class="info-icon" data-toggle="tooltip" title="Geben Sie zusätzlichen Text ein, wenn Option2 gewählt wurde">?</span>
             </label>
-            <input type="checkbox" class="form-control" id="configCheckbox">
+            <input type="text" class="form-control" id="additionalText">
+          </div>
+          <div class="form-group">
+            <label for="configCheckbox" class="required-field">Checkbox Optionen
+              <span class="info-icon" data-toggle="tooltip" title="Wählen Sie eine oder mehrere Optionen">?</span>
+            </label>
+            <div id="configCheckbox">
+              <input type="checkbox" name="checkboxOptions" value="OptionA"> OptionA<br>
+              <input type="checkbox" name="checkboxOptions" value="OptionB"> OptionB<br>
+              <div style="margin-left: 20px;">
+                <input type="checkbox" name="checkboxOptions" value="OptionB1"> OptionB1<br>
+                <input type="checkbox" name="checkboxOptions" value="OptionB2"> OptionB2<br>
+              </div>
+              <input type="checkbox" name="checkboxOptions" value="OptionC"> OptionC<br>
+            </div>
           </div>
           <div class="form-group">
             <label for="configRadio">Radio Buttons
@@ -64,16 +88,16 @@
             <input type="range" class="form-control" id="configRange" min="1" max="100">
           </div>
           <div class="form-group">
-            <label for="configDate">Datum
+            <label for="configDate" class="required-field">Datum
               <span class="info-icon" data-toggle="tooltip" title="Wählen Sie ein Datum">?</span>
             </label>
-            <input type="date" class="form-control" id="configDate">
+            <input type="date" class="form-control" id="configDate" required>
           </div>
           <div class="form-group">
             <label for="configColor">Farbe
               <span class="info-icon" data-toggle="tooltip" title="Wählen Sie eine Farbe">?</span>
             </label>
-            <input type="color" class="form-control" id="configColor">
+            <input type="color" class="form-control color-picker" id="configColor">
           </div>
           <button type="submit" class="btn btn-primary">Generieren</button>
         </form>
@@ -95,12 +119,50 @@
     $(document).ready(function() {
       $('[data-toggle="tooltip"]').tooltip();
 
+      function updateConfigSummary() {
+        const configName = $('#configName').val() || "<nicht ausgefüllt>";
+        const configOption = $('#configOption').val();
+        const additionalText = $('#additionalText').val() || "<nicht ausgefüllt>";
+        const configCheckbox = $('input[name="checkboxOptions"]:checked').map(function() { return this.value; }).get().join(", ") || "<nicht ausgefüllt>";
+        const configRadio = $('input[name="configRadio"]:checked').val() || "<nicht ausgefüllt>";
+        const configRange = $('#configRange').val();
+        const configDate = $('#configDate').val() || "<nicht ausgefüllt>";
+        const configColor = $('#configColor').val();
+
+        const configData = {
+          name: configName,
+          option: configOption,
+          additionalText: configOption === 'Option2' ? additionalText : "N/A",
+          checkbox: configCheckbox,
+          radio: configRadio,
+          range: configRange,
+          date: configDate,
+          color: configColor
+        };
+
+        $('#configSummary').text(JSON.stringify(configData, null, 2));
+      }
+
+      $('#configOption').change(function() {
+        if ($(this).val() === 'Option2') {
+          $('#additionalTextField').show();
+        } else {
+          $('#additionalTextField').hide();
+        }
+        updateConfigSummary();
+      });
+
+      $('#configForm input, #configForm select').on('input change', function() {
+        updateConfigSummary();
+      });
+
       $('#configForm').on('submit', function(event) {
         event.preventDefault();
 
         const configName = $('#configName').val();
         const configOption = $('#configOption').val();
-        const configCheckbox = $('#configCheckbox').is(':checked');
+        const additionalText = $('#additionalText').val();
+        const configCheckbox = $('input[name="checkboxOptions"]:checked').map(function() { return this.value; }).get();
         const configRadio = $('input[name="configRadio"]:checked').val();
         const configRange = $('#configRange').val();
         const configDate = $('#configDate').val();
@@ -109,6 +171,7 @@
         const configData = {
           name: configName,
           option: configOption,
+          additionalText: configOption === 'Option2' ? additionalText : "N/A",
           checkbox: configCheckbox,
           radio: configRadio,
           range: configRange,
@@ -119,9 +182,9 @@
         const yamlStr = jsyaml.dump(configData);
         const blob = new Blob([yamlStr], { type: 'application/x-yaml' });
         saveAs(blob, 'config.yaml');
-
-        $('#configSummary').text(JSON.stringify(configData, null, 2));
       });
+
+      updateConfigSummary(); // Initial update of summary
     });
   </script>
 </body>
