@@ -3,7 +3,8 @@ $(document).ready(function() {
   
     function updateConfigSummary() {
       const configData = getConfigData();
-      $('#configSummary').text(JSON.stringify(configData, null, 2));
+      const yamlStr = jsyaml.dump(configData);
+      $('#configSummary').text(yamlStr);
     }
   
     $('#configOption').change(function() {
@@ -27,3 +28,4 @@ $(document).ready(function() {
   
     updateConfigSummary(); // Initial update of summary
   });
+  

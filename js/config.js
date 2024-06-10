@@ -25,3 +25,4 @@ function getConfigData() {
     const blob = new Blob([yamlStr], { type: 'application/x-yaml' });
     saveAs(blob, 'config.yaml');
   }
+  
